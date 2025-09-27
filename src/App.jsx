@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import NavBar from './components/NavBar'
 import Header from './components/Header'
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
   return (
     <>
       <div className=''>
+        <NavBar></NavBar>
         <Header></Header>
       </div>
     </>
