@@ -1,6 +1,6 @@
 import React from 'react'
 
-const NavBar = () => {
+const NavBar = ({onSearch}) => {
   return (
       <div className='flex justify-between items-center shadow-sm h-20'>
         <div className='mx-10 text-3xl font-bold font-mono'>PicxKart</div>

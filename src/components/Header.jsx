@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Header = () => {
+const Header = ({onSearch}) => {
+  const [input,setInput]=useState("");
+
+  const handleSubmit=(e)=>{
+    e.preventDefault();
+    if(input.trim()){
+      onSearch(input.trim());
+      setInput("");
+    }
+  }
+
   return (
     <header className="p-6 flex justify-evenly w-full h-100 shadow-sm">
       <div className='w-9/12 flex justify-center'>
@@ -8,12 +18,13 @@ const Header = () => {
           <h1 className="w-fit md:w-fit text-2xl md:text-5xl font-bold px-2">
             The best free stock photos, royalty free images & videos shared by creators.
           </h1>
-          <form className="mt-4">
-            <input
+          <form className="mt-4 w-full flex" onSubmit={handleSubmit}>
+            <input value={input} onChange={(e)=>{setInput(e.target.value)}}
               type="text"
-              className="px-5 bg-gray-100 py-4 md:w-full w-full rounded-xl border-none shadow-lg "
+              className="px-5 bg-gray-100 py-4 md:w-full w-full rounded-l-xl border-none shadow-lg "
               placeholder="Search"
             />
+            <button className='bg-gray-100 rounded-r-xl shadow-lg p-2' type='submit'>Search</button>
           </form>
         </div>
       </div>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react'
 import Masonry from 'react-masonry-css';
+import ImageCard from './ImageCard';
 
 
-const Body = () => {
+const Body = ({searchQuery}) => {
   const pexelsKey = import.meta.env.VITE_PEXELS_API;
   const pixabayKey = import.meta.env.VITE_PIXABAY_API;
 
@@ -14,23 +15,40 @@ const Body = () => {
   // console.log(apiKey)
 
   const fetchData = async () => {
+    if (!pexelsKey || !pixabayKey) return;
     setLoading(true);
-    const [pexelsData, pixabayData] = await Promise.all([fetch(`https://api.pexels.com/v1/curated?per_page=12&page=${page}`, {
-      headers: {
-        Authorization: pexelsKey,
-      },
-    }),
-    fetch(`https://pixabay.com/api/?key=${pixabayKey}&per_page=12&page=${page}`)])
+    const urls = !searchQuery
+        ? [
+            fetch(
+              `https://api.pexels.com/v1/curated?per_page=12&page=${page}`,
+              { headers: { Authorization: pexelsKey } }
+            ),
+            fetch(
+              `https://pixabay.com/api/?key=${pixabayKey}&per_page=12&page=${page}`
+            ),
+          ]
+        : [
+            fetch(
+              `https://api.pexels.com/v1/search?query=${searchQuery}&per_page=12&page=${page}`,
+              { headers: { Authorization: pexelsKey } }
+            ),
+            fetch(
+              `https://pixabay.com/api/?key=${pixabayKey}&q=${searchQuery}&per_page=12&page=${page}`
+            ),
+          ];
+
+      const [pexelsData, pixabayData] = await Promise.all(urls);
+
 
     const pexelsList = await pexelsData.json();
     const pixabayList = await pixabayData.json();
 
-    const pexelsFootageList = pexelsList.photos.map(photo => ({
+    const pexelsFootageList = pexelsList?.photos?.map(photo => ({
       id: `pexels-${photo.id}`,
       url: photo.src.original
     }))
 
-    const pixabayFootageList = pixabayList.hits.map(photo => ({
+    const pixabayFootageList = pixabayList?.hits?.map(photo => ({
       id: `pixabay-${photo.id}`,
       url: photo.largeImageURL
     }))
@@ -59,7 +77,12 @@ const Body = () => {
 
   useEffect(() => {
     fetchData();
-  }, [page])
+  }, [page,searchQuery])
+
+  useEffect(()=>{
+    setImageList([]);
+    setPage[1];
+  },[searchQuery])
 
   //Intersection Observer
   useEffect(() => {
@@ -70,7 +93,7 @@ const Body = () => {
         }
       },
       { threshold: 0,
-        
+        rootMargin: "0px 0px 5000px 0px"
        }
     );
 
@@ -91,7 +114,7 @@ const Body = () => {
         className="flex w-full gap-6 p-4"
         columnClassName="bg-clip-padding">
         {
-          imageList?.map(photo => (<img src={photo?.url} key={photo?.id} className='w-full mb-6 h-auto object-cover rounded-xl'></img>))
+          imageList?.map(photo => (<ImageCard url={photo?.url} key={photo?.id}></ImageCard>))
         }
       </Masonry>
       <div ref={loader} className="h-10 w-full flex justify-center items-center">

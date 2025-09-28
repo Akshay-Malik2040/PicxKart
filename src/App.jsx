@@ -4,14 +4,20 @@ import Header from './components/Header'
 import Body from './components/Body'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [searchQuery,setSearchQuery]=useState("");
+  const [hasSearched,setHasSearched]=useState(false);
+
+  const handleSearch=(query)=>{
+    setSearchQuery(query);
+    setHasSearched(true);
+  }
 
   return (
     <>
       <div className=''>
-        <NavBar></NavBar>
-        <Header></Header>
-        <Body></Body>
+        <NavBar onSearch={handleSearch}></NavBar>
+        <Header onSearch={handleSearch}></Header>
+        <Body searchQuery={searchQuery}></Body>
       </div>
     </>
   )
