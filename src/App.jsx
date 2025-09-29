@@ -4,7 +4,7 @@ import Header from './components/Header'
 import Body from './components/Body'
 
 function App() {
-  const [searchQuery,setSearchQuery]=useState("");
+  const [searchQuery,setSearchQuery]=useState(null);
   const [hasSearched,setHasSearched]=useState(false);
 
   const handleSearch=(query)=>{
