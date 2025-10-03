@@ -1,4 +1,3 @@
-// src/components/ScriptUploader.jsx
 import React, { useState } from "react";
 import { removeStopwords } from "stopword"; // npm install stopword
 
@@ -63,7 +62,7 @@ const ScriptUploader = ({ onSearch }) => {
     const kws = extractKeywords(text);
     setKeywords(kws);
     if (kws.length > 0) {
-      onSearch(kws.join(" "));
+      onSearch(kws);
     }
   };
 

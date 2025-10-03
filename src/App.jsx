@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import NavBar from './components/NavBar'
 import Header from './components/Header'
 import Body from './components/Body'
@@ -11,6 +11,10 @@ function App() {
     setSearchQuery(query);
     setHasSearched(true);
   }
+
+  // useEffect(()=>{
+  //   console.log(searchQuery)
+  // })
 
   return (
     <>
