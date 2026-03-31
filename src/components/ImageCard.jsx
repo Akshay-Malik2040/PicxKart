@@ -100,8 +100,9 @@ const ImageCard = ({ item }) => {
         <div className="relative w-full h-auto rounded-2xl overflow-hidden bg-black">
             <video 
                 ref={videoRef}
-                src={item.previewUrl} 
+                src={`${item.previewUrl}#t=0.1`} 
                 poster={item.thumbnail}
+                preload="metadata"
                 className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity"
                 muted 
                 loop 
