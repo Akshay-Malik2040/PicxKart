@@ -1,10 +1,14 @@
 import React, { useState, useRef } from 'react';
+import { useCart } from '../context/CartContext';
 
 const ImageCard = ({ item }) => {
   const [downloadingUrl, setDownloadingUrl] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const videoRef = useRef(null);
+
+  const { addToCart, removeFromCart, isInCart, resolveGlobalUrl } = useCart();
+  const inCart = isInCart(item.id);
 
   const handleMouseEnter = () => {
     if (videoRef.current) {
@@ -20,13 +24,39 @@ const ImageCard = ({ item }) => {
     }
   };
 
-  // Close dropdown when picking an option
-  const triggerDownload = async (url, resolutionKey) => {
+  const toggleCart = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      if (inCart) {
+          removeFromCart(item.id);
+      } else {
+          addToCart(item);
+      }
+  };
+
+  // Close dropdown when picking an option or directly downloading
+  const triggerDownload = async (urlOverride, resolutionKey) => {
     setShowDropdown(false);
-    setDownloadingUrl(resolutionKey);
+    
+    // If no url provided, use the global resolver
+    let targetUrl = urlOverride;
+    let qualityName = resolutionKey;
+
+    if (!targetUrl) {
+       targetUrl = resolveGlobalUrl(item);
+       // determine name for file just for visual or fallback
+       qualityName = "global";
+    }
+
+    if (!targetUrl) {
+        alert("Failed to find a valid download link.");
+        return;
+    }
+
+    setDownloadingUrl(qualityName);
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(targetUrl);
       if (!response.ok) throw new Error("Network response was not ok");
       
       const blob = await response.blob();
@@ -35,7 +65,7 @@ const ImageCard = ({ item }) => {
       const link = document.createElement('a');
       link.href = blobUrl;
       const ext = item.type === 'video' ? 'mp4' : 'jpg';
-      link.download = `picxkart-${resolutionKey}-${item.id}.${ext}`;
+      link.download = `picxkart-${qualityName}-${item.id}.${ext}`;
       
       document.body.appendChild(link);
       link.click();
@@ -85,22 +115,51 @@ const ImageCard = ({ item }) => {
       )}
 
       {/* Glassmorphic Overlay */}
-      <div className='absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex items-end justify-end p-4'>
+      <div className='absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl flex flex-col justify-between p-4'>
             
-            {/* Action Area */}
-            <div className="relative">
+            {/* Top Action Area (Add to Cart) */}
+            <div className="flex justify-end">
                 <button 
-                    onClick={() => setShowDropdown(!showDropdown)}
-                    className='glass py-2 px-4 rounded-xl text-sm font-semibold text-slate-900 hover:bg-white transition flex items-center gap-2 shadow-lg'
-                    disabled={downloadingUrl !== null}
+                    onClick={toggleCart}
+                    className={`glass p-2.5 rounded-full shadow-lg transition-transform transform active:scale-90 hover:bg-white cursor-pointer ${
+                        inCart ? 'text-green-600 bg-white ring-2 ring-green-500/50' : 'text-slate-700'
+                    }`}
+                    title={inCart ? "Remove from Cart" : "Add to Cart"}
                 >
-                    {downloadingUrl !== null ? (
-                        <svg className="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    {inCart ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7"></path></svg>
                     ) : (
-                        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
                     )}
-                    {downloadingUrl !== null ? 'Buffering...' : 'Download'}
                 </button>
+            </div>
+
+            {/* Bottom Action Area (Download) */}
+            <div className="relative flex justify-end">
+                <div className="flex shadow-lg rounded-xl overflow-hidden glass">
+                    {/* Primary Button (Uses Global Res) */}
+                    <button 
+                        onClick={() => triggerDownload()}
+                        className='py-2 px-4 text-sm font-semibold text-slate-900 hover:bg-white transition flex items-center gap-2 cursor-pointer'
+                        disabled={downloadingUrl !== null}
+                    >
+                        {downloadingUrl !== null ? (
+                            <svg className="animate-spin h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        ) : (
+                            <svg className="w-4 h-4 text-blue-600 border border-blue-600 rounded" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        )}
+                        {downloadingUrl !== null ? 'Buffering...' : 'Download'}
+                    </button>
+                    
+                    {/* Secondary Dropdown Button (Override Global Res) */}
+                    <button 
+                        onClick={() => setShowDropdown(!showDropdown)}
+                        disabled={downloadingUrl !== null}
+                        className="px-2 border-l border-slate-200/40 hover:bg-white transition flex items-center justify-center text-slate-700 cursor-pointer"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                </div>
 
                 {/* Dropdown Menu */}
                 {showDropdown && (
@@ -113,7 +172,7 @@ const ImageCard = ({ item }) => {
                                 <button
                                     key={resType}
                                     onClick={(e) => { e.stopPropagation(); triggerDownload(url, resType); }}
-                                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition flex items-center justify-between group/item"
+                                    className="w-full text-left px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition flex items-center justify-between group/item cursor-pointer"
                                 >
                                     <span className="capitalize">{resType}</span>
                                     <svg className="w-4 h-4 text-blue-400 opacity-0 group-hover/item:opacity-100 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
