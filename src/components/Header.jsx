@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import ScriptUploader from './ScriptUploader';
+import AiScriptUploader from './AiScriptUploader';
 
 const Header = ({onSearch}) => {
 
   return (
     <header className="p-6 flex justify-evenly w-full h-100 shadow-sm">
       <div className='w-9/12 flex justify-center'>
-          <ScriptUploader onSearch={onSearch}/>
+          <AiScriptUploader onSearch={onSearch}/>
       </div>
 
       <section className="flex gap-4 w-5/12  justify-evenly items-center p-2">
