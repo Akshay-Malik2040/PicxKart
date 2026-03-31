@@ -4,6 +4,21 @@ const ImageCard = ({ item }) => {
   const [downloadingUrl, setDownloadingUrl] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const videoRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+        videoRef.current.play().catch(e => console.log('Play interrupted:', e));
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setShowDropdown(false);
+    if (videoRef.current) {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+    }
+  };
 
   // Close dropdown when picking an option
   const triggerDownload = async (url, resolutionKey) => {
@@ -39,7 +54,8 @@ const ImageCard = ({ item }) => {
   return (
     <div 
         className='relative group mb-6 rounded-2xl overflow-visible shadow-sm hover:shadow-xl transition-all duration-500 bg-slate-50 border border-slate-100'
-        onMouseLeave={() => setShowDropdown(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
     >
       
       {/* Media Rendering */}
@@ -53,10 +69,10 @@ const ImageCard = ({ item }) => {
       ) : (
         <div className="relative w-full h-auto rounded-2xl overflow-hidden bg-black">
             <video 
+                ref={videoRef}
                 src={item.previewUrl} 
                 poster={item.thumbnail}
                 className="w-full h-auto object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                autoPlay 
                 muted 
                 loop 
                 playsInline
