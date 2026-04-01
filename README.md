@@ -1,7 +1,4 @@
 # PicxKart 🎬
-
-![PicxKart Hero](https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&q=80&w=2000&ixlib=rb-4.0.3)
-
 **PicxKart** is a modern, responsive, and intelligent stock footage aggregation platform. It helps content creators, video editors, and designers seamlessly find, collect, and download the perfect high-quality photos and videos for their projects. 
 
 Equipped with an advanced **AI-powered Script Analyzer**, PicxKart takes the guesswork out of finding footage. Simply paste your script, and let our AI extract the most impactful keywords to instantly surface relevant media!
